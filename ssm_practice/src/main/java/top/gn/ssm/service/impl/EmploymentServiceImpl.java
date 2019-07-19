@@ -31,6 +31,7 @@ public class EmploymentServiceImpl implements EmploymentService{
     public PageInfo<Employment> getEmploymentPage(Integer pageNum) {
         PageHelper.startPage(pageNum,5);
         List<Employment> emps = employmentMapper.selectByExampleWithDept(null);
+//       navigatePages : 用于分页底部的导航栏的显示
         PageInfo<Employment> page = new PageInfo<Employment>(emps,5);
         return page;
     }
