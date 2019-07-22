@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import top.gn.ssm.bean.Employment;
@@ -31,6 +32,19 @@ public class EmploymentHandler {
 
     public void setEmploymentServiceImpl(EmploymentService employmentServiceImpl) {
         this.employmentServiceImpl = employmentServiceImpl;
+    }
+
+
+    @RequestMapping(value = "/emp",method = RequestMethod.POST)
+    public BaseResult addOneEmp(Employment employment){
+        int i = this.employmentServiceImpl.addEmployment(employment);
+        BaseResult baseResult = null;
+        if(i != 0){
+            baseResult = new BaseResult("添加成功",true,200);
+        }else {
+            baseResult = new BaseResult("添加失败",false,-1);
+        }
+        return baseResult;
     }
 
     @RequestMapping("/emps")

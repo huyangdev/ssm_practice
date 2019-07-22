@@ -18,20 +18,60 @@
         .table .btn{
             margin-left:5px;
         }
+
     </style>
 </head>
 <body>
 <div class="container">
     <h1 class="page_title">SSM项目小练习</h1>
     <div class="global_operate">
-        <button type="button" class="btn btn-info btn-sm">
-            <span class="glyphicon glyphicon-pencil"></span>
-            编辑
+        <button type="button" class="btn btn-info btn-sm btn-primary" data-target="#myModal" id="btn-modal" >
+            新增
         </button>
         <button type="button" class="btn btn-danger btn-sm">
             <span class="glyphicon glyphicon-trash"></span>
             删除
         </button>
+
+        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="create-modal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">员工添加</h4>
+                    </div>
+                    <div class="modal-body" id="modal-box">
+                        <form>
+                            <div class="form-group">
+                                <label for="emp_name">Name</label>
+                                <input class="form-control" name="empName" type="text" placeholder=" 名称" id="emp_name">
+                            </div>
+                            <div class="from-groug">
+                                <label for="emp_email">Email</label>
+                                <input id="emp_email" class="form-control" name="emall" type="email" placeholder=" 邮箱">
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="gender" value="M" /> 男
+                                <label></label>
+                                <input type="radio" name="gender" value="W" /> 女
+                            </div>
+
+                            <div id="select_department_box" class="from-select col-sm-2">
+                                <label class="control-label">部门</label>
+                                <select class="form-control" name="deptId">
+                                    <!-- 动态添加 部门选项 -->
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" id="submit">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <table class="table table-hover table-striped">
@@ -106,16 +146,41 @@
             </nav>
         </div>
     </div>
+
+
+
 </div>
 </body>
-                <!-- 引入bootstrap和Jquery -->
-                <script type="text/javascript" src="${basePath}/static/js/jquery-1.12.4.min.js"></script>
+
+<!-- 引入bootstrap和Jquery -->
+<script type="text/javascript" src="${basePath}/static/js/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="${basePath}/static/bootstrap337/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
+    var pageTotalSize = 0;
     $(function(){
         sendEmpsAjax(1);
     });
+
+/* 添加员工 start */
+    $("#submit").click(function(){
+        // 1. 拿到添加数据
+        var data = $("#modal-box form").serialize();
+        // 2. 发送Ajax
+        $.post("${basePath}/emp",data,function(response){
+            // 3. 获取返回结果
+            alert(response.meg);
+            // 4. 关闭添加窗口
+            $("#create-modal").modal("hide");
+            // 5. 跳转到最后一页,显示刚刚添加的员工
+            sendEmpsAjax(pageTotalSize);
+        });
+    });
+/* 添加员工 end */
+
+
+/*主页分页相关操作 start  */
+    // 查询员工分页数据
     function sendEmpsAjax(pn){
         $.ajax({
             url:"${basePath}/emps",
@@ -131,6 +196,7 @@
             }
         });
     }
+
     function buildEmpTable(result){
         var empList = result.data.pageInfo.list,
             empTable = $(".table tbody"),
@@ -145,10 +211,11 @@
             oButEdit = null,
             oButDelete = null;
 
-        empTable.html(""); // tbody内html清除
+        empTable.empty(); // tbody内html清除
 
         $.each(empList , function(index,item){
-            tdCheckbox = $("<input type='checkbox' />");
+            tdCheckbox = $("<td></td>")
+                .append($("<input type='checkbox' />").addClass("input-checkbok"));
             tdEmpId = $("<td></td>").append(item.empId);
             tdEmpName = $("<td></td>").append(item.empName);
             tdEmpEmail = $("<td></td>").append(item.emall);
@@ -211,7 +278,8 @@
         for(var num in navNums){
             activeShowClass = navNums[num] == pageInfo.pageNum?"active":"";
             var i = parseInt(num)+2;
-            navLiAll.eq(i).find("a").attr("onClick","sendEmpsAjax(" + navNums[num] + ")")
+            navLiAll.eq(i).find("a")
+                .attr("onClick","sendEmpsAjax(" + navNums[num] + ")")
                 .html(navNums[num]);
             // 将上次点击页数,取消高亮
             navLiAll.eq(preClickIndex).removeClass(activeShowClass);
@@ -230,7 +298,6 @@
             navLiAll.eq(7).removeClass("disabled").find("a").attr("onClick","sendEmpsAjax("+ (pageInfo.pageNum+1) +")");
             navLiAll.eq(8).removeClass("disabled").find("a").attr("onClick","sendEmpsAjax("+ pageInfo.pages +")");
         }
-
     }
     // 底部导航左侧
     function buildNavLeft(pageInfo){
@@ -240,8 +307,47 @@
         oSpan1.eq(0).html(pageInfo.pageNum);
         oSpan1.eq(1).html(pageInfo.pages);
         oSpan2.eq(0).html(pageInfo.total);
-
+        pageTotalSize = pageInfo.total;
     }
+/* 主页分页相关操作 end */
+
+
+/* 模态框 start */
+    $("#btn-modal").click(function(){
+        // 显示部门信息
+        sendShowDeptName();
+
+        // 弹出模态框
+        $("#create-modal").modal({
+            backdrop:"static",
+            keyboard:false
+        });
+    });
+    // 查询部门名称用于添加员工选择
+    function sendShowDeptName(){
+        $.ajax({
+            url:"${basePath}/depts",
+            type:"get",
+            success:function(response){
+                var depts = response.data.departmentList,
+                    oSelect = $("#select_department_box select"),
+                    oOption = null;
+
+                for(var index in depts){
+                    oOption = $("<option></option>").attr("value",depts[index].deptId)
+                        .html(depts[index].deptName);
+                    // 将option添加到select当中
+                    oSelect.append(oOption);
+                }
+            }
+        })
+    }
+/* 模态框 end */
+
+
+
+
+
 </script>
 
 </html>

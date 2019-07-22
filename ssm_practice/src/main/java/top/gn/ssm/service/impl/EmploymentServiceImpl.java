@@ -35,4 +35,9 @@ public class EmploymentServiceImpl implements EmploymentService{
         PageInfo<Employment> page = new PageInfo<Employment>(emps,5);
         return page;
     }
+
+    @Override
+    public int addEmployment(Employment employment){
+        return this.employmentMapper.insertSelective(employment);
+    }
 }

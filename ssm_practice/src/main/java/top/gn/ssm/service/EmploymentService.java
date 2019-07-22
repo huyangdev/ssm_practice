@@ -12,4 +12,5 @@ public interface EmploymentService {
 
     PageInfo<Employment> getEmploymentPage(Integer pageNum);
 
+    int addEmployment(Employment employment);
 }
