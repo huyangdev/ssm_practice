@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.gn.ssm.bean.Employment;
+import top.gn.ssm.bean.EmploymentExample;
 import top.gn.ssm.dao.EmploymentMapper;
 import top.gn.ssm.service.EmploymentService;
 
@@ -21,6 +22,10 @@ public class EmploymentServiceImpl implements EmploymentService{
     @Autowired
     private EmploymentMapper employmentMapper;
 
+    @Override
+    public Employment getEmploymentById(Integer id){
+        return this.employmentMapper.selectByPrimaryKeyWithDept(id);
+    }
 
     /**
      * 返回的pageInfo可以进行页码的连续显示
@@ -39,5 +44,13 @@ public class EmploymentServiceImpl implements EmploymentService{
     @Override
     public int addEmployment(Employment employment){
         return this.employmentMapper.insertSelective(employment);
+    }
+
+    @Override
+    public List<Employment> validateEmpNameOrNotRepeat(String empName){
+        EmploymentExample employmentExample = new EmploymentExample();
+        EmploymentExample.Criteria criteria = employmentExample.createCriteria();
+        criteria.andEmpNameEqualTo(empName);
+        return this.employmentMapper.selectByExample(employmentExample);
     }
 }

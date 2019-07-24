@@ -3,13 +3,16 @@ package top.gn.ssm.controller;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
 import top.gn.ssm.bean.Employment;
+import top.gn.ssm.common.ConstantField;
 import top.gn.ssm.dto.BaseResult;
 import top.gn.ssm.service.EmploymentService;
+
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * Created by Administrator on 10/07/2019.
@@ -21,10 +24,6 @@ public class EmploymentHandler {
     @Autowired
     private EmploymentService employmentServiceImpl;
 
-    public BaseResult getEmpsAjax(){
-        return null;
-    }
-
 
     public EmploymentService getEmploymentServiceImpl() {
         return employmentServiceImpl;
@@ -34,17 +33,47 @@ public class EmploymentHandler {
         this.employmentServiceImpl = employmentServiceImpl;
     }
 
+    @RequestMapping(value = "/redisplayEmp/{empId}",method = RequestMethod.GET)
+    public BaseResult getEmploymentById(@PathVariable("empId") Integer empId){
+        // 参数判断是否为空
+        if(empId==null || "".equals(empId)) return new BaseResult("处理失败, 参数不能为空!!" , false , -1);
 
-    @RequestMapping(value = "/emp",method = RequestMethod.POST)
-    public BaseResult addOneEmp(Employment employment){
-        int i = this.employmentServiceImpl.addEmployment(employment);
+        // 参数判断 是否为数字 true : 是数字, false: 不是纯数字
+        if(!empId.toString().matches(ConstantField.RegExpOrNotNumber0to10)){
+            return new BaseResult("处理失败, 参数不合法!!" , false , -1);
+        }
+
+        Employment emp = this.employmentServiceImpl.getEmploymentById(empId);
         BaseResult baseResult = null;
-        if(i != 0){
-            baseResult = new BaseResult("添加成功",true,200);
-        }else {
-            baseResult = new BaseResult("添加失败",false,-1);
+        if(emp == null){
+            baseResult = BaseResult.fail();
+        }else{
+            baseResult = BaseResult.success().addShowField("emp",emp);
         }
         return baseResult;
+    }
+
+    @RequestMapping(value = "/emp",method = RequestMethod.POST)
+    public BaseResult addOneEmp(@Valid Employment employment, BindingResult bindingResult){
+        BaseResult baseResult = null;
+        if(bindingResult.hasErrors()){
+            // 拿到错误信息, 封装到BaseResult当中, 返回给前台显示
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            baseResult = new BaseResult("字段校验失败",false,-2);
+            for (FieldError f :errors) {
+                System.out.println("错误字段: "+f.getField()+" 错误消息:"+ f.getDefaultMessage());
+                baseResult.addShowField(f.getField() , f.getDefaultMessage());
+            }
+            return baseResult;
+        }else{
+            int i = this.employmentServiceImpl.addEmployment(employment);
+            if(i != 0){
+                baseResult = new BaseResult("添加成功",true,200);
+            }else {
+                baseResult = new BaseResult("添加失败",false,-1);
+            }
+            return baseResult;
+        }
     }
 
     @RequestMapping("/emps")
@@ -59,6 +88,19 @@ public class EmploymentHandler {
         return BaseResult.success().addShowField("pageInfo", page);
     }
 
+    @RequestMapping("/empNameRepeat")
+    public BaseResult validateEmpName(@RequestParam("empName") String empName){
+        List<Employment> employments = this.employmentServiceImpl
+                .validateEmpNameOrNotRepeat(empName);
+        System.out.println(empName);
+        BaseResult baseResult = null;
+        if(employments.size() == 0){
+            baseResult = new BaseResult("员工名称无重复",true,200);
+        }else {
+            baseResult = new BaseResult("员工名称重复",false,-1);
+        }
+        return baseResult;
+    }
 
     //老版本
     //@RequestMapping("/emps")

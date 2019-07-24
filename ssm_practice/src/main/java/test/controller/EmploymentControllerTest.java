@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import top.gn.ssm.bean.Employment;
+import top.gn.ssm.controller.EmploymentHandler;
+import top.gn.ssm.dto.BaseResult;
 
 import java.util.List;
 
@@ -28,6 +30,9 @@ import java.util.List;
 public class EmploymentControllerTest {
     // mock 一个虚假的mvc
     MockMvc mock;
+
+    @Autowired
+    private EmploymentHandler employmentHandler;
 
     /*
      WebApplicationContext : 是spring-mvc的ioc容器
@@ -70,4 +75,12 @@ public class EmploymentControllerTest {
             System.out.println("----部门: " + e.getDepartment().getDeptName());
         }
     }
+
+
+    @Test
+    public void validateEmpNameOrNotRepeatTest(){
+        BaseResult baseResult = this.employmentHandler.validateEmpName("胡杨");
+        System.out.println(baseResult.getMeg());
+    }
+
 }

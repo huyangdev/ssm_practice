@@ -15,4 +15,9 @@ public class DTOTest {
         System.out.println(baseResult.getData());
     }
 
+    @Test
+    public void tempTest(){
+        System.out.println("11111111111111111111111".matches("^[1-9]{1,10}$"));
+    }
+
 }

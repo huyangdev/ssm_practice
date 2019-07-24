@@ -19,6 +19,7 @@ public class EmploymentTest {
     @Autowired
     private EmploymentMapper employmentMapper;
 
+
     @Autowired
     private SqlSessionTemplate sqlSessionTemplate;
 
@@ -47,6 +48,8 @@ public class EmploymentTest {
                     uid + "@huyang.com", 4, null));
         }
     }
+
+
 
 
 }
