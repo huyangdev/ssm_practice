@@ -45,6 +45,9 @@ public class BaseResult implements Serializable {
     public static BaseResult success(){
         return new BaseResult("处理成功",true , SUCCESS_CODE);
     }
+    public static BaseResult success(String meg){
+        return new BaseResult(meg,true , SUCCESS_CODE);
+    }
 
     /**
      * 失败时调用
@@ -53,6 +56,9 @@ public class BaseResult implements Serializable {
      */
     public static BaseResult fail(){
         return new BaseResult("处理失败" , false , FAIL_CODE);
+    }
+    public static BaseResult fail(String meg){
+        return new BaseResult(meg , false , FAIL_CODE);
     }
 
 

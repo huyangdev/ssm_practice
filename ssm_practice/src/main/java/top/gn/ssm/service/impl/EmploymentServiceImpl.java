@@ -22,6 +22,60 @@ public class EmploymentServiceImpl implements EmploymentService{
     @Autowired
     private EmploymentMapper employmentMapper;
 
+
+    @Override
+    public int deleteById(Integer id){
+        return this.employmentMapper.deleteByPrimaryKey(id);
+    }
+
+
+
+
+
+    /**
+     * 添加一个员工对象
+     * @author Hu Ji mi
+     * @param employment 为需要添加到数据库的员工对象封装体
+     * @date 2019/7/24 20:42
+     */
+    @Override
+    public int addEmployment(Employment employment){
+        return this.employmentMapper.insertSelective(employment);
+    }
+
+    /**
+     *
+     * @author Hu Ji mi
+     * @param
+     * @date 2019/7/24 20:44
+     */
+    @Override
+    public int updateEmpById(Employment employment){
+        return this.employmentMapper.updateByPrimaryKeySelective(employment);
+    }
+
+
+    /**
+     * 删除多个员工 , 根据前台返回的id集合, 通过in关键字
+     * @author Hu Ji mi
+     * @param ids 要删除的员工的id集合
+     * @date 2019/7/27 22:07
+     */
+    @Override
+    public int deleteEmpsByInId(List<Integer> ids){
+        EmploymentExample employmentExample = new EmploymentExample();
+        EmploymentExample.Criteria criteria = employmentExample.createCriteria();
+        criteria.andEmpIdIn(ids);
+        int effectLine = this.employmentMapper.deleteByExample(employmentExample);
+        return effectLine;
+    }
+
+    /**
+     * 根据指定的id, 查询对应的员工
+     * @author Hu Ji mi
+     * @param id:员工id
+     * @date 2019/7/24 20:41
+     */
     @Override
     public Employment getEmploymentById(Integer id){
         return this.employmentMapper.selectByPrimaryKeyWithDept(id);
@@ -36,16 +90,16 @@ public class EmploymentServiceImpl implements EmploymentService{
     public PageInfo<Employment> getEmploymentPage(Integer pageNum) {
         PageHelper.startPage(pageNum,5);
         List<Employment> emps = employmentMapper.selectByExampleWithDept(null);
-//       navigatePages : 用于分页底部的导航栏的显示
         PageInfo<Employment> page = new PageInfo<Employment>(emps,5);
         return page;
     }
 
-    @Override
-    public int addEmployment(Employment employment){
-        return this.employmentMapper.insertSelective(employment);
-    }
-
+    /**
+     * 验证员工名称是否重复
+     * @author Hu Ji mi
+     * @param empName 为员工名称
+     * @date 2019/7/24 20:44
+     */
     @Override
     public List<Employment> validateEmpNameOrNotRepeat(String empName){
         EmploymentExample employmentExample = new EmploymentExample();

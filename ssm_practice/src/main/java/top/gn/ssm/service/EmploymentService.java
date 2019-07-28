@@ -20,4 +20,10 @@ public interface EmploymentService {
 
     Employment getEmploymentById(Integer id);
 
+    int updateEmpById(Employment employment);
+
+    int deleteById(Integer id);
+
+    // 批量删除多个员工
+    int deleteEmpsByInId(List<Integer> ids);
 }
